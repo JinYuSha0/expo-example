@@ -32,27 +32,30 @@ export const normalize = () => {
   const originalTextRender = RNText.render;
   RNText.render = function (...args) {
     const origin = originalTextRender.call(this, ...args);
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const defaultColor = useCssColorVariable("--foreground");
-    return React.cloneElement(origin, {
-      ...origin.props,
-      style: [{ color: defaultColor }, origin.props.style],
-    });
+    const WrappedComponent = () => {
+      const defaultColor = useCssColorVariable("--foreground");
+      return React.cloneElement(origin, {
+        ...origin.props,
+        style: [{ color: defaultColor }, origin.props.style],
+      });
+    };
+    return React.createElement(WrappedComponent);
   };
 
   const RNTextInput = TextInput as unknown as OverrideComponent;
   const originalTextInputRender = RNTextInput.render;
   RNTextInput.render = function (...args) {
     const origin = originalTextInputRender.call(this, ...args);
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const defaultColor = useCssColorVariable("--foreground");
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const defaultPlaceholderColor = useCssColorVariable("--foreground", 0.5);
-    return React.cloneElement(origin, {
-      ...origin.props,
-      placeholderTextColor:
-        origin.props.placeholderTextColor ?? defaultPlaceholderColor,
-      style: [{ color: defaultColor }, origin.props.style],
-    });
+    const WrappedComponent = () => {
+      const defaultColor = useCssColorVariable("--foreground");
+      const defaultPlaceholderColor = useCssColorVariable("--foreground", 0.5);
+      return React.cloneElement(origin, {
+        ...origin.props,
+        placeholderTextColor:
+          origin.props.placeholderTextColor ?? defaultPlaceholderColor,
+        style: [{ color: defaultColor }, origin.props.style],
+      });
+    };
+    return React.createElement(WrappedComponent);
   };
 };

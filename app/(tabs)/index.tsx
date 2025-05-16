@@ -19,8 +19,11 @@ export default function HomeScreen() {
   return (
     <View className="flex flex-1 bg-background">
       <Pressable onPress={onPress}>
-        <Text>Test Portal</Text>
+        <Text className="text-[16@s] text-red-600">Test Portal</Text>
       </Pressable>
+
+      <View className="w-[350@s] h-[350@s] bg-red-300"></View>
+      <View className="w-[350] h-[350] bg-yellow-300"></View>
     </View>
   );
 }

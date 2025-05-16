@@ -12,23 +12,4 @@ export default [
     plugins: [typescript(), json()],
     external: (id) => /node_modules/.test(id),
   },
-  {
-    input: path.resolve("src/babel/index.ts"),
-    output: {
-      file: path.resolve("dist/babel.js"),
-      format: "cjs",
-    },
-    plugins: [
-      typescript({
-        tsconfigOverride: {
-          compilerOptions: {
-            declaration: false,
-          },
-        },
-      }),
-      ,
-      json(),
-    ],
-    external: (id) => /node_modules/.test(id),
-  },
 ];
