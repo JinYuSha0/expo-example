@@ -1,9 +1,10 @@
 import clsx from "clsx";
 import React, { memo, ReactNode, useCallback, useEffect } from "react";
-import { BackHandler, Pressable } from "react-native";
+import { BackHandler, GestureResponderEvent, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { PortalCloseError } from "./Portal";
 
-interface OverlayProps {
+export interface OverlayProps {
   children: ReactNode | undefined;
   name: string;
   closeable?: boolean;
@@ -23,15 +24,13 @@ interface OverlayProps {
   handleBack: () => boolean;
 }
 
-export class PortalCloseError extends Error {}
-
 const Overlay: React.FC<OverlayProps> = ({
   children,
   name,
   closeable = true,
   overlayPressCloaseable = true,
   orientation = "centerMiddle",
-  bgColor = "bg-black/40",
+  bgColor = "rgba(0,0,0,0.4)",
   onClose,
   handleBack,
 }) => {
@@ -39,6 +38,9 @@ const Overlay: React.FC<OverlayProps> = ({
     if (!closeable || !overlayPressCloaseable) return;
     onClose(new PortalCloseError(`${name} Close by overlayPress`));
   }, [name, closeable, overlayPressCloaseable, onClose]);
+  const stopPropagation = useCallback((evt: GestureResponderEvent) => {
+    evt.stopPropagation();
+  }, []);
   useEffect(() => {
     if (!closeable) return;
     const subscription = BackHandler.addEventListener(
@@ -55,7 +57,7 @@ const Overlay: React.FC<OverlayProps> = ({
   return (
     <Pressable
       onPress={close}
-      className={clsx("absolute inset-0 flex flex-row", bgColor, {
+      className={clsx("absolute inset-0 flex flex-row", {
         "justify-start items-start": orientation === "leftTop",
         "justify-start items-center": orientation === "leftMiddle",
         "justify-start items-end": orientation === "leftBottom",
@@ -66,8 +68,13 @@ const Overlay: React.FC<OverlayProps> = ({
         "justify-end items-center": orientation === "rightMiddle",
         "justify-end items-end": orientation === "rightBottom",
       })}
+      style={{
+        backgroundColor: bgColor,
+      }}
     >
-      <SafeAreaView>{children}</SafeAreaView>
+      <SafeAreaView>
+        <Pressable onPress={stopPropagation}>{children}</Pressable>
+      </SafeAreaView>
     </Pressable>
   );
 };

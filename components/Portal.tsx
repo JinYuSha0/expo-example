@@ -25,7 +25,7 @@ type PortalState = Portal<any> & {
 
 type PromiseWithPortal<T> = Promise<T> & Portal<T>;
 
-type ShowPortalMethodParams<T = unknown> = {
+export type ShowPortalMethodParams<T = unknown> = {
   name?: string;
   index?: number;
   component: PortalComponent<T>;
@@ -64,6 +64,8 @@ const getTopPortalName = (portals: Map<string, PortalState>) => {
   return last([...portals.values()].sort((a, b) => a.index - b.index))?.name;
 };
 
+export class PortalCloseError extends Error {}
+
 export const PortalProvider: React.FC<React.PropsWithChildren> = ({
   children,
 }) => {
@@ -99,7 +101,6 @@ export const PortalProvider: React.FC<React.PropsWithChildren> = ({
       let { name = `Portal_${randomStr()}`, index, component } = props;
 
       const { promise, resolve, reject } = deferred<T>();
-      promise.finally(remove.bind(null, name));
       const close = (result: T | Error) => {
         if (result instanceof Error) {
           reject(result);
@@ -109,7 +110,10 @@ export const PortalProvider: React.FC<React.PropsWithChildren> = ({
       };
 
       setPortals((prev) => {
-        if (prev.has(name)) return prev;
+        if (prev.has(name)) {
+          close(new PortalCloseError(`Portal ${name} already exists`));
+          return prev;
+        }
         index ??= prev.size;
         prev.set(name, {
           name,
@@ -132,6 +136,7 @@ export const PortalProvider: React.FC<React.PropsWithChildren> = ({
             : component,
           close,
         });
+        promise.finally(remove.bind(null, name));
         return new Map(prev);
       });
 

@@ -1,6 +1,6 @@
-import { initialUIScaleSize, setDebug } from "nativewind-size-matters";
+import { initialUIScaleSize } from "nativewind-size-matters";
 import { normalize } from "./utils/ui";
 
-setDebug(true);
+// setDebug(true);
 initialUIScaleSize(350, 750);
 normalize();
