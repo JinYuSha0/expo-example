@@ -26,42 +26,23 @@ type NativeCssParsed = {
   >;
 };
 
-const matchClassName = (
-  className: string
-):
-  | {
-      type: "s" | "vs" | "ms" | "mvs";
-      factor: number | undefined;
-    }
-  | undefined => {
-  const regex = /@(?<type>s|vs|ms|mvs)(?<factor>\d+(\.\d+)?)?/;
+const matchClassName = (className: string) => {
+  const regex = /(\w+(?:-\w+)*)-\[(\d+(?:\.\d+)?)px\]/;
   const match = className.match(regex);
   if (match) {
+    const [fullMatch, prefix, value] = match;
     return {
-      type: match.groups.type as "s" | "vs" | "ms" | "mvs",
-      factor:
-        match.groups.factor === undefined ? undefined : +match.groups.factor,
+      fullMatch,
+      prefix,
+      value: parseFloat(value),
     };
   }
-};
-
-const matchMethod = {
-  s: scale,
-  vs: verticalScale,
-  ms: moderateScale,
-  mvs: moderateVerticalScale,
 };
 
 const getUniqueFieldName = (obj) => {
   const keys = Object.keys(obj);
   return keys.length === 1 ? keys[0] : null;
 };
-
-const propertyMap = {
-  text: "fontSize",
-  border: "borderWidth",
-};
-const propertyKeys = Object.keys(propertyMap);
 
 export const __css = (parsed: NativeCssParsed) => {
   let startTime;
@@ -72,17 +53,11 @@ export const __css = (parsed: NativeCssParsed) => {
   for (const [className, style] of Object.entries(parsed.rules)) {
     try {
       const match = matchClassName(className);
-      if (match.type) {
+      if (match) {
         const property = style.n[0].d[0][0];
         let fieldName = getUniqueFieldName(property);
-        const fieldValue = property[fieldName];
         if (!fieldName) return;
-        const prefix = className.match(/.*(?=-[^-]*$)/)[0];
-        if (propertyKeys.includes(prefix)) {
-          delete property[fieldName];
-          fieldName = propertyMap[prefix];
-        }
-        property[fieldName] = matchMethod[match.type](fieldValue, match.factor);
+        property[fieldName] = scale(match.value);
         debug(className, property);
       }
     } catch {}

@@ -26,8 +26,8 @@ export default function HomeScreen() {
         <Text className="text-[16@s] text-red-600">Test Portal</Text>
       </Pressable>
 
-      <View className="w-[350@s] h-[350@s] bg-red-300"></View>
-      <View className="w-[350] h-[350] bg-yellow-300"></View>
+      <View className="w-[350px] h-[350px] bg-red-300"></View>
+      <View className="w-[350] h-[350] border-red-500 bg-yellow-300"></View>
     </View>
   );
 }
